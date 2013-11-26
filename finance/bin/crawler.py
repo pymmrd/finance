@@ -6,6 +6,8 @@ import sys
 import time
 import random
 import urllib2
+import urlparse
+import traceback
 from datetime import datetime
 
 #Third-party imports
@@ -80,6 +82,16 @@ def gen_news(title, category, site, url, chksum, pub_date):
     ni.chksum = chksum 
     ni.save()
 
+def conact_url(url, link):
+    if not url.startswith('http'):
+        parse_domain = urlparse.urlparse(link)
+        domain = parse_domain.netloc
+        scheme = parse_domain.scheme
+        uri = '%s//:%s' % (scheme, domain)
+        url = urlparse.urljoin(uri, url)
+    return url
+        
+
 def spider():
     crawlers = NewsRule.objects.all() 
     count = 0
@@ -92,6 +104,7 @@ def spider():
             try:
                 url = item.xpath(crawl.url_xpath)[0]
                 url = url.encode('utf-8')
+                url = conact_url(url, link)
                 title = item.xpath(crawl.title_xpath)[0]
                 title = title.encode('utf-8')
                 pub_date = item.xpath(crawl.date_xpath)[0]
@@ -103,9 +116,9 @@ def spider():
                     gen_news(title, crawl.category, crawl.site, url, chksum, pub_date)
                 else:
                     break
-            except:
-                import pdb
-                pdb.set_trace()
+            except Exception, e:
+                print e
+                traceback.print_exc()
 
 if __name__ == "__main__":
     spider()
