@@ -70,7 +70,7 @@ def check_news_exists_or_not(chksum):
         pass
     else:
         exists = True
-    return True
+    return exists
 
 def gen_news(title, category, site, url, chksum, pub_date):
     ni = NewsItem()
@@ -84,11 +84,11 @@ def gen_news(title, category, site, url, chksum, pub_date):
 
 def conact_url(url, link):
     if not url.startswith('http'):
-        parse_domain = urlparse.urlparse(link)
-        domain = parse_domain.netloc
-        scheme = parse_domain.scheme
-        uri = '%s//:%s' % (scheme, domain)
-        url = urlparse.urljoin(uri, url)
+        #parse_domain = urlparse.urlparse(link)
+        #domain = parse_domain.netloc
+        #scheme = parse_domain.scheme
+        #uri = '%s://%s' % (scheme, domain)
+        url = urlparse.urljoin(link, url)
     return url
         
 
@@ -107,7 +107,7 @@ def spider():
                 url = conact_url(url, link)
                 title = item.xpath(crawl.title_xpath)[0]
                 title = title.encode('utf-8')
-                pub_date = item.xpath(crawl.date_xpath)[0]
+                pub_date = item.xpath(crawl.date_xpath)[0].strip()
                 pub_date = pub_date.encode('utf-8')
                 chksum = get_chksum(title, url, pub_date)
                 exists = check_news_exists_or_not(chksum)
@@ -117,6 +117,7 @@ def spider():
                 else:
                     break
             except Exception, e:
+                print 'error link', link
                 print e
                 traceback.print_exc()
 
