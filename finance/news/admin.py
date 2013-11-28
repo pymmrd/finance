@@ -14,8 +14,14 @@ class SiteAdmin(admin.ModelAdmin):
 class NewsRuleAdmin(admin.ModelAdmin):
     list_display = ('site', 'category', 'xpath_prefix','title_xpath', 'url_xpath', 'date_fmt', 'date_xpath',  'url')
 
+def make_published(modeladmin, request, queryset):
+    queryset.update(status='p')
+make_published.short_description = u"导出选中的网站摘要, 未实现"
+
 class NewsItemAdmin(admin.ModelAdmin):
-    list_display = ('check_title',  'category', 'pub_date',  'site', 'check_news', )
+    list_display = ('id', 'check_title',  'category', 'pub_date', 'created_date',  'site', 'summary', 'is_exported', 'check_news', )
+    actions = [make_published]
+
     def check_news(self, obj):
         return "<a href='%s' target='_blank'>%s</a>" % (obj.url, u'点击查看')
     check_news.allow_tags = True
