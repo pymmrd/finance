@@ -1,0 +1,10 @@
+echo 'start kill'
+pids=`ps aux|grep '[f]inance_uwsgi.ini'|awk -F' ' '{print $2}'`
+if [ "$pids" ];then
+        kill -9 $pids
+fi
+echo 'stop end...'
+cd /var/www/wwwroot/finance/finance/finance
+uwsgi --ini finance_uwsgi.ini
+echo 'restart end...'
+
