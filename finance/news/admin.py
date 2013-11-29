@@ -15,11 +15,11 @@ class NewsRuleAdmin(admin.ModelAdmin):
     list_display = ('site', 'category', 'xpath_prefix','title_xpath', 'url_xpath', 'date_fmt', 'date_xpath',  'url')
 
 def make_published(modeladmin, request, queryset):
-    queryset.update(status='p')
-make_published.short_description = u"导出选中的网站摘要, 未实现"
+    queryset.update(is_exported=True)
+make_published.short_description = u"标记选中需要导出的新闻"
 
 class NewsItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'check_title',  'category', 'pub_date', 'created_date',  'site', 'summary', 'is_exported', 'check_news', )
+    list_display = ('id','is_exported', 'check_title',  'category', 'pub_date', 'created_date',  'site', 'summary',  'check_news', )
     actions = [make_published]
 
     def check_news(self, obj):

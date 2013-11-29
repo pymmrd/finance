@@ -55,7 +55,7 @@ class NewsItem(models.Model):
     pub_date = models.DateTimeField(blank=True, verbose_name=u'新闻发布时间')
     chksum = models.CharField(max_length=64, db_index=True)
     summary = models.TextField(blank=True, verbose_name=u'摘要')
-    is_exported = models.BooleanField(default=False, verbose_name=u'是否已经导出')
+    is_exported = models.BooleanField(default=False, verbose_name=u'是否导出')
     created_date = models.DateTimeField(auto_now=True,verbose_name=u'爬虫抓取时间')
 
     class Meta:
