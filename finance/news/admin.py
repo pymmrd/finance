@@ -48,13 +48,23 @@ def make_published(modeladmin, request, queryset):
 make_published.short_description = u"标记选中需要导出的新闻"
 
 class NewsItemAdmin(admin.ModelAdmin):
-    list_display = ('is_exported', 'check_title',  'category', 'pub_date', 'created_date',  'site', 'summary',  'check_news', )
+    list_display = ('is_exported', 'check_title',  'category', 'pub_date', 'created_date',  'site', 'summary',  'check_news', 'delete_news' )
     actions = [make_published]
+
+    class Media:
+        from django.conf import settings
+        static_url = getattr(settings, 'STATIC_URL', '/static')
+        js = [ static_url+'admin/js/finance.js', ]
 
     def check_news(self, obj):
         return "<a href='%s' target='_blank'>%s</a>" % (obj.url, u'点击查看')
     check_news.allow_tags = True
     check_news.short_description = '新闻链接'
+
+    def delete_news(self, obj):
+        return "<button value='%s' class='delete' type='button'>%s</button>" % (obj.pk, u'删除') 
+    delete_news.allow_tags = True
+    delete_news.short_description = u'删除'
     
     def check_title(self, obj):
         return "<a href='%s' target='_blank'>%s</a>" % (obj.url, obj.title)
