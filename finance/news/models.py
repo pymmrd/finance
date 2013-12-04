@@ -43,6 +43,8 @@ class NewsRule(models.Model):
     date_xpath = models.CharField(max_length=255,
                                 blank=True,
                                 verbose_name=u'日期规则')
+    use_proxy = models.BooleanField(default=False, 
+                                    verbose_name=u'是否需要代理') 
     created_date = models.DateTimeField(auto_now=True)
 
 
