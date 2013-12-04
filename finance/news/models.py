@@ -31,16 +31,18 @@ class NewsRule(models.Model):
                                     verbose_name=u"抓取链接规则")
     url = models.URLField(verify_exists=False, 
                                 verbose_name=u'抓取页面')
-	url_pattern = models.CharField(max_length=255,
-									blank=True,
-									verbose_name=u'分页样式')
-	page = models.CharField(max_length=255,
-							blank=True,
-							verbose_name=u'分页规则')
+    url_pattern = models.CharField(max_length=255,
+                                    blank=True,
+                                    verbose_name=u'分页样式')
+    page = models.CharField(max_length=255,
+                            blank=True,
+                            verbose_name=u'分页规则')
     date_fmt = models.CharField(max_length=50,
                                 verbose_name=u'日期格式')
     date_xpath = models.CharField(max_length=255,
                                 verbose_name=u'日期规则')
+    use_proxy = models.BooleanField(default=False, 
+                                    verbose_name=u'是否需要代理') 
     created_date = models.DateTimeField(auto_now=True)
 
 

@@ -27,7 +27,17 @@ from django.utils.hashcompat import md5_constructor as md5
 
 from news.models import NewsRule, Site, NewsItem 
 
-def get_content(url):
+PROXY_IP = '127.0.0.1'
+PROXY_HOST = 'http://%s' % PROXY_IP
+PROXY_PORT = 8087
+
+def install_proxy():
+    proxy=urllib2.ProxyHandler({'http': '%s:%s'%(PROXY_HOST, PROXY_PORT)})
+    opener=urllib2.build_opener(proxy)
+    urllib2.install_opener(opener)
+    return urllib2
+
+def get_content(url, use_proxy=False):
     user_agents = [
         'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11',
         'Opera/9.25 (Windows NT 5.1; U; en)',
@@ -37,6 +47,8 @@ def get_content(url):
     content = ''
     headers = {'User-Agent':random.choice(user_agents)}
     req = urllib2.Request(url=url, headers=headers)
+    if use_proxy:
+        req.set_proxy('%s:%s' % (PROXY_IP, PROXY_PORT), 'http')
     try:
         content = urllib2.urlopen(req, timeout=10).read()
     except urllib2.HTTPError, e:
@@ -97,7 +109,8 @@ def spider():
     count = 0
     for crawl in crawlers:
         link = crawl.url
-        content = get_content(link)
+        use_proxy = crawl.use_proxy
+        content = get_content(link, use_proxy)
         dom = html.fromstring(content)
         items = dom.xpath(crawl.xpath_prefix)
         for item in items:
@@ -106,11 +119,14 @@ def spider():
                 url = url.encode('utf-8')
                 url = conact_url(url, link)
                 title = item.xpath(crawl.title_xpath)[0]
-				if isinstance(title, html.HtmlElement):
-					title = title.text_content()
+                if isinstance(title, html.HtmlElement):
+                    title = title.text_content()
                 title = title.encode('utf-8')
-                pub_date = item.xpath(crawl.date_xpath)[0].strip()
-                pub_date = pub_date.encode('utf-8')
+                pub_date=None
+                date_xpath = crawl.date_xpath
+                if date_xpath:
+                    pub_date = item.xpath(date_xpath)[0].strip()
+                    pub_date = pub_date.encode('utf-8')
                 chksum = get_chksum(title, url, pub_date)
                 exists = check_news_exists_or_not(chksum)
                 if not exists:
