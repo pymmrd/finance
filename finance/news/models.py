@@ -57,6 +57,7 @@ class NewsItem(models.Model):
     summary = models.TextField(blank=True, verbose_name=u'摘要')
     is_exported = models.BooleanField(default=False, verbose_name=u'是否导出')
     created_date = models.DateTimeField(auto_now=True,verbose_name=u'爬虫抓取时间')
+    is_active = models.BooleanField(default=True, verbose_name=u'是否激活')
 
     class Meta:
         db_table = 'newsitem' 

@@ -55,6 +55,11 @@ class NewsItemAdmin(admin.ModelAdmin):
         from django.conf import settings
         static_url = getattr(settings, 'STATIC_URL', '/static')
         js = [ static_url+'admin/js/finance.js', ]
+    
+    def queryset(self, request):
+        qs = super(self.__class__, self).queryset(request)
+        queryset = qs.filter(is_active=True)
+        return queryset
 
     def check_news(self, obj):
         return "<a href='%s' target='_blank'>%s</a>" % (obj.url, u'点击查看')
