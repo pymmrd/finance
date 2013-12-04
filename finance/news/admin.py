@@ -13,6 +13,8 @@ from news.models import Site, NewsRule, NewsItem
 from django.contrib import admin
 from django.http import HttpResponse
 
+admin.site.disable_action('delete_selected')
+
 class SiteAdmin(admin.ModelAdmin):
     list_display = ('name', 'check_url')
 
