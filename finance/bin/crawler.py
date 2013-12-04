@@ -11,6 +11,7 @@ import traceback
 from datetime import datetime
 
 #Third-party imports
+import simplejson
 from lxml import html
 
 pathjoin = os.path.join
@@ -102,42 +103,84 @@ def conact_url(url, link):
         #uri = '%s://%s' % (scheme, domain)
         url = urlparse.urljoin(link, url)
     return url
-        
+
+def nytimes(content, crawl):
+    data = simplejson.loads(content)
+    results = data['results']['results']
+    for item in results:
+        title = item['og:title']
+        url = item['og:url']
+        pub_date = item['dat']
+        chksum = get_chksum(title, url, pub_date)
+        exists = check_news_exists_or_not(chksum)
+        if not exists:
+            pub_date = datetime.strptime(pub_date, crawl.date_fmt)
+            gen_news(title, crawl.category, crawl.site, url, chksum, pub_date)
+        else:
+            break
+
+def crawl_news(dom, crawl):
+    link = crawl.url
+    is_break = False
+    items = dom.xpath(crawl.xpath_prefix)
+    for item in items:
+        try:
+            url = item.xpath(crawl.url_xpath)[0]
+            url = url.encode('utf-8')
+            url = conact_url(url, link)
+            title = item.xpath(crawl.title_xpath)[0]
+            if isinstance(title, html.HtmlElement):
+                title = title.text_content()
+            title = title.encode('utf-8')
+            pub_date=None
+            date_xpath = crawl.date_xpath
+            if date_xpath:
+                pub_date = item.xpath(date_xpath)[0].strip()
+                pub_date = pub_date.encode('utf-8')
+            chksum = get_chksum(title, url, pub_date)
+            exists = check_news_exists_or_not(chksum)
+            if not exists:
+                if pub_date:
+                    pub_date = datetime.strptime(pub_date, crawl.date_fmt)
+                gen_news(title, crawl.category, crawl.site, url, chksum, pub_date)
+            else:
+                is_break = True
+                break
+        except Exception, e:
+            print 'error link', link
+            print e
+            traceback.print_exc()
+    return is_break
 
 def spider():
-    crawlers = NewsRule.objects.all() 
+    crawlers = NewsRule.objects.filter(is_active=True) 
     count = 0
     for crawl in crawlers:
         link = crawl.url
         use_proxy = crawl.use_proxy
         content = get_content(link, use_proxy)
-        dom = html.fromstring(content)
-        items = dom.xpath(crawl.xpath_prefix)
-        for item in items:
-            try:
-                url = item.xpath(crawl.url_xpath)[0]
-                url = url.encode('utf-8')
-                url = conact_url(url, link)
-                title = item.xpath(crawl.title_xpath)[0]
-                if isinstance(title, html.HtmlElement):
-                    title = title.text_content()
-                title = title.encode('utf-8')
-                pub_date=None
-                date_xpath = crawl.date_xpath
-                if date_xpath:
-                    pub_date = item.xpath(date_xpath)[0].strip()
-                    pub_date = pub_date.encode('utf-8')
-                chksum = get_chksum(title, url, pub_date)
-                exists = check_news_exists_or_not(chksum)
-                if not exists:
-                    pub_date = datetime.strptime(pub_date, crawl.date_fmt)
-                    gen_news(title, crawl.category, crawl.site, url, chksum, pub_date)
-                else:
-                    break
-            except Exception, e:
-                print 'error link', link
-                print e
-                traceback.print_exc()
+        try:
+            dom = html.fromstring(content)
+        except:
+            pass
+        else:
+            is_break = crawl_news(dom, crawl)
+            if not is_break:
+                try:
+                    page_count = int(dom.xpath(crawl.page_xpath)[0])
+                except:
+                    page_count = 15
+                for index in xrange(2, page_count+1):
+                    link = crawl.url_pattern % index
+                    content = get_content(link, use_proxy)
+                    try:
+                        dom = html.fromstring(content)
+                    except:
+                        pass
+                    else:
+                        is_break = crawl_news(dom, crawl)
+                        if is_break:
+                            break
 
 if __name__ == "__main__":
     spider()

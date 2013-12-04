@@ -26,8 +26,10 @@ class NewsRule(models.Model):
                                     blank=True,
                                     verbose_name=u'xpath前缀')
     title_xpath = models.CharField(max_length=255, 
+                                    blank=True,
                                 verbose_name=u'标题抓取规则')
     url_xpath = models.CharField(max_length=255,
+                                    blank=True,
                                     verbose_name=u"抓取链接规则")
     url = models.URLField(verify_exists=False, 
                                 verbose_name=u'抓取页面')
@@ -46,6 +48,7 @@ class NewsRule(models.Model):
     use_proxy = models.BooleanField(default=False, 
                                     verbose_name=u'是否需要代理') 
     created_date = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=False, verbose_name=u'是否激活')
 
 
     class Meta:
@@ -62,7 +65,9 @@ class NewsItem(models.Model):
                                 verbose_name=u'新闻标题')
     url = models.URLField(verify_exists=False, 
                                 verbose_name=u'新闻链接')
-    pub_date = models.DateTimeField(blank=True, verbose_name=u'新闻发布时间')
+    pub_date = models.DateTimeField(blank=True, 
+                                    null=True,
+                                    verbose_name=u'新闻发布时间')
     chksum = models.CharField(max_length=64, db_index=True)
     summary = models.TextField(blank=True, verbose_name=u'摘要')
     is_exported = models.BooleanField(default=False, verbose_name=u'是否导出')
