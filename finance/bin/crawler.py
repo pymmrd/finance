@@ -38,7 +38,7 @@ def get_content(url):
     headers = {'User-Agent':random.choice(user_agents)}
     req = urllib2.Request(url=url, headers=headers)
     try:
-        content = urllib2.urlopen(req).read()
+        content = urllib2.urlopen(req, timeout=10).read()
     except urllib2.HTTPError, e:
         if e.code == 503 : 
             time.sleep(30)
@@ -53,7 +53,7 @@ def tryAgain(url, retries=0):
     if retries < 4:
         try:
             time.sleep(30)
-            content = urllib2.urlopen(req).read()
+            content = urllib2.urlopen(req, timeout=10).read()
         except :
             retries += 1
             content = tryAgain(url, retries)
