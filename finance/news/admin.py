@@ -51,6 +51,7 @@ make_published.short_description = u"标记选中需要导出的新闻"
 
 class NewsItemAdmin(admin.ModelAdmin):
     list_display = ('is_exported', 'check_title',  'category', 'pub_date', 'created_date',  'site', 'summary',  'check_news', 'delete_news' )
+    list_filter = ('site',)
     actions = [make_published]
 
     class Media:
