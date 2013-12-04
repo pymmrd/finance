@@ -12,7 +12,9 @@ from news.models import NewsItem
 def delete_news(request):
     success = False
     pk = int(request.POST.get('pk'))
-    ni = NewsItem.objects.get(pk=pk).delete()
+    ni = NewsItem.objects.get(pk=pk)
+	ni.is_active = False
+	ni.save()
     success = True
     response = simplejson.dumps({'success': success})
     return HttpResponse(response, content_type='application/javascript; charset=utf-8')
