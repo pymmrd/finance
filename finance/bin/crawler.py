@@ -106,6 +106,8 @@ def spider():
                 url = url.encode('utf-8')
                 url = conact_url(url, link)
                 title = item.xpath(crawl.title_xpath)[0]
+				if isinstance(title, html.HtmlElement):
+					title = title.text_content()
                 title = title.encode('utf-8')
                 pub_date = item.xpath(crawl.date_xpath)[0].strip()
                 pub_date = pub_date.encode('utf-8')
